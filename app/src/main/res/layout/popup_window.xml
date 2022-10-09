@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/actionExtendFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Action"
+        app:cornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/actionFab1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Act 1"
+        android:visibility="gone"
+        app:cornerRadius="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/actionExtendFab"
+        app:layout_constraintEnd_toEndOf="@+id/actionExtendFab"
+        app:layout_constraintStart_toStartOf="@+id/actionExtendFab" />
+
+    <Button
+        android:id="@+id/actionFab2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Act 2"
+        android:visibility="gone"
+        app:cornerRadius="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/actionFab1"
+        app:layout_constraintEnd_toEndOf="@+id/actionFab1"
+        app:layout_constraintStart_toStartOf="@+id/actionFab1" />
+
+    <Button
+        android:id="@+id/actionFab3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Act 3"
+        android:visibility="gone"
+        app:cornerRadius="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/actionFab2"
+        app:layout_constraintEnd_toEndOf="@+id/actionFab2"
+        app:layout_constraintStart_toStartOf="@+id/actionFab2" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

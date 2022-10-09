@@ -7,12 +7,9 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.RemoteInput;
-
-import com.firstresponder.app.Models.Contact;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -155,21 +152,6 @@ public class NotificationReceiver extends NotificationListenerService {
             }
         }
         return false;
-    }
-
-    private void logBundle(Bundle bundle) {
-        try {
-            FileOutputStream out = new FileOutputStream(getCacheDir() + "/BundleDump-" + System.currentTimeMillis() + ".txt");
-            for (String key : bundle.keySet()) {
-                String data = key + " | " + bundle.get(key) + "\n";
-                out.write(data.getBytes());
-            }
-            out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private String[] parseTitle(String title){
