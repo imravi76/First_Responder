@@ -21,7 +21,6 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class AddRuleActivity extends AppCompatActivity {
 
@@ -92,14 +91,6 @@ public class AddRuleActivity extends AppCompatActivity {
         mLinearLayout = findViewById(R.id.linearLayout);
 
         if (type.equals("update")){
-            StringBuilder test = new StringBuilder(getIntent().getExtras().getString("ruleId"));
-            test.append(getIntent().getExtras().getString("ruleStatus"));
-            test.append(getIntent().getExtras().getString("ruleMsg"));
-            test.append(getIntent().getExtras().getString("ruleReply"));
-            test.append(getIntent().getExtras().getString("ruleCount"));
-            test.append(getIntent().getExtras().getString("ruleContact"));
-            test.append(getIntent().getExtras().getString("ruleIgnored"));
-            //Toast.makeText(this, test, Toast.LENGTH_LONG).show();
 
             mReplyCard.setVisibility(View.VISIBLE);
             mSpecificCard.setVisibility(View.VISIBLE);

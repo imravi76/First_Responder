@@ -51,9 +51,11 @@ public class RuleAdapter extends RecyclerView.Adapter<RuleAdapter.ViewHolder>{
         if (modal.getStatus().equals("1")){
             holder.mSwitch.setChecked(true);
             holder.mStatus.setText("Rule Status: On");
+            holder.mSwitch.setText("On");
         } else{
             holder.mSwitch.setChecked(false);
             holder.mStatus.setText("Rule Status: Off");
+            holder.mSwitch.setText("Off");
         }
 
         holder.itemView.setTag(modal.getId());
@@ -62,11 +64,11 @@ public class RuleAdapter extends RecyclerView.Adapter<RuleAdapter.ViewHolder>{
             if (b){
                 dbHandler.updateRule(modal.getId(), "1");
                 holder.mStatus.setText("Rule Status: On");
-                holder.mSwitch.setText("1");
+                holder.mSwitch.setText("On");
             }else {
                 dbHandler.updateRule(modal.getId(), "0");
                 holder.mStatus.setText("Rule Status: Off");
-                holder.mSwitch.setText("0");
+                holder.mSwitch.setText("Off");
             }
 
         });

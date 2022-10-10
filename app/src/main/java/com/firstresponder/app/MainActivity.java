@@ -1,32 +1,35 @@
 package com.firstresponder.app;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.widget.Toast;
 
-import com.firstresponder.app.Fragments.CallFragment;
-import com.firstresponder.app.Fragments.MessageFragment;
-import com.firstresponder.app.Fragments.SettingsFragment;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.firstresponder.app.Adapters.RuleAdapter;
+import com.firstresponder.app.Models.Rule;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private MessageFragment messageFragment;
-    private CallFragment callFragment;
-    private SettingsFragment settingsFragment;
+    //private SettingsFragment settingsFragment;
+
+    private ExtendedFloatingActionButton mAddRule;
+
+    private ArrayList<Rule> ruleModalArrayList;
+    private DBHandler dbHandler;
+    private RuleAdapter ruleAdapter;
+    private RecyclerView ruleRV;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -34,36 +37,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView mainbottomNav = findViewById(R.id.mainBottomNav);
+        mAddRule = findViewById(R.id.addRule);
 
-        messageFragment = new MessageFragment();
-        callFragment = new CallFragment();
-        settingsFragment = new SettingsFragment();
-
-        initializeFragment();
-
-        mainbottomNav.setOnNavigationItemSelectedListener(item -> {
-
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_container);
-
-            switch (item.getItemId()){
-                case R.id.bottom_message:
-                    replaceFragment(messageFragment, currentFragment);
-                    return true;
-
-                case R.id.bottom_call:
-                    replaceFragment(callFragment, currentFragment);
-                    return true;
-
-                case R.id.bottom_setting:
-                    replaceFragment(settingsFragment, currentFragment);
-                    return true;
-
-                default:
-                    return false;
-            }
-
+        mAddRule.setOnClickListener(view -> {
+            Intent addNewRule = new Intent(MainActivity.this, AddRuleActivity.class);
+            addNewRule.putExtra("ruleMethod", "new");
+            startActivity(addNewRule);
         });
+
+        ruleModalArrayList = new ArrayList<>();
+        dbHandler = new DBHandler(MainActivity.this);
+
+        ruleModalArrayList = dbHandler.readRules();
+
+        ruleAdapter = new RuleAdapter(ruleModalArrayList, MainActivity.this);
+        ruleRV = findViewById(R.id.ruleRecycler);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL, false);
+        ruleRV.setLayoutManager(linearLayoutManager);
+
+        ruleRV.setAdapter(ruleAdapter);
+        enableSwipeToDeleteAndUndo();
 
         boolean isNotificationServiceRunning = isNotificationServiceRunning();
 
@@ -96,54 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
         isNotificationServiceRunning();
 
-        checkOverlayPermission();
-        //startService();
-
-    }
-
-    private void initializeFragment() {
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-
-        fragmentTransaction.add(R.id.main_container, messageFragment);
-        fragmentTransaction.add(R.id.main_container, callFragment);
-        fragmentTransaction.add(R.id.main_container, settingsFragment);
-
-        fragmentTransaction.hide(callFragment);
-        fragmentTransaction.hide(settingsFragment);
-
-        fragmentTransaction.commit();
-    }
-
-    private void replaceFragment(Fragment fragment, Fragment currentFragment){
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-
-        if(fragment == messageFragment){
-
-            fragmentTransaction.hide(callFragment);
-            fragmentTransaction.hide(settingsFragment);
-
-        }
-
-        if(fragment == callFragment){
-
-            fragmentTransaction.hide(messageFragment);
-            fragmentTransaction.hide(settingsFragment);
-
-        }
-
-        if (fragment == settingsFragment){
-            fragmentTransaction.hide(messageFragment);
-            fragmentTransaction.hide(callFragment);
-        }
-
-        assert fragment != null;
-        fragmentTransaction.show(fragment);
-
-        fragmentTransaction.replace(R.id.main_container, fragment);
-        fragmentTransaction.commit();
-
     }
 
     private boolean isNotificationServiceRunning() {
@@ -154,19 +100,22 @@ public class MainActivity extends AppCompatActivity {
         return enabledNotificationListeners != null && enabledNotificationListeners.contains(packageName);
     }
 
-    public void startService(){
+    private void enableSwipeToDeleteAndUndo() {
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(MainActivity.this) {
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
 
-        if(Settings.canDrawOverlays(this)) {
-            startForegroundService(new Intent(this, ForegroundService.class));
-        }
-    }
+                final int position = viewHolder.getAdapterPosition();
+                //final String item = ruleAdapter.getData().get(position);
+                ruleAdapter.removeItem(position);
+                dbHandler.deleteRule((Integer) viewHolder.itemView.getTag());
+                Toast.makeText(MainActivity.this, "Position: "+viewHolder.itemView.getTag(), Toast.LENGTH_SHORT).show();
 
-    public void checkOverlayPermission(){
+            }
+        };
 
-        if (!Settings.canDrawOverlays(this)) {
-            Intent myIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            startActivity(myIntent);
-        }
+        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeToDeleteCallback);
+        itemTouchhelper.attachToRecyclerView(ruleRV);
     }
 
 }
