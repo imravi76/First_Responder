@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.firstresponder.app.Models.Rule;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DBHandler extends SQLiteOpenHelper {
 
@@ -149,6 +150,76 @@ public class DBHandler extends SQLiteOpenHelper {
 
         cursorRules.close();
         return ruleModalArrayList;
+    }
+
+    public List<Rule> nonContact(String contact){
+        ArrayList<Rule> rules = new ArrayList<>();
+
+            SQLiteDatabase sqLiteDatabase = getReadableDatabase();
+            Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_RULES + " where status = '1' and received_msg = '*welcome*' and ? not in (ignored_contacts)", new String[]{contact});
+
+            if(cursor.moveToFirst()){
+
+                do {
+                    rules.add(new Rule(cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4),
+                    cursor.getString(5),
+                    cursor.getString(6)));
+                } while (cursor.moveToNext());
+            }
+        cursor.close();
+        return rules;
+    }
+
+    public List<Rule> Contact(String contact){
+        List<Rule> rules = null;
+        try{
+            SQLiteDatabase sqLiteDatabase = getReadableDatabase();
+            Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_RULES + " where status = '1' and received_msg = '*' and ignored_contacts != ?", new String[]{contact});
+            if(cursor.moveToFirst()){
+                rules = new ArrayList<>();
+                do {
+                    Rule rule = new Rule();
+                    rule.setId(cursor.getInt(0));
+                    rule.setStatus(cursor.getString(1));
+                    rule.setMsg(cursor.getString(2));
+                    rule.setReply(cursor.getString(3));
+                    rule.setMsgCount(cursor.getString(4));
+                    rule.setSpecificContact(cursor.getString(5));
+                    rule.setIgnoredContact(cursor.getString(6));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rules;
+    }
+
+    public List<Rule> Match(String msg, String contact){
+        List<Rule> rules = null;
+        try{
+            SQLiteDatabase sqLiteDatabase = getReadableDatabase();
+            Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_RULES + " where status = '1' and received_msg = ? and ignored_contacts != ?", new String[]{msg, contact});
+            if(cursor.moveToFirst()){
+                rules = new ArrayList<>();
+                do {
+                    Rule rule = new Rule();
+                    rule.setId(cursor.getInt(0));
+                    rule.setStatus(cursor.getString(1));
+                    rule.setMsg(cursor.getString(2));
+                    rule.setReply(cursor.getString(3));
+                    rule.setMsgCount(cursor.getString(4));
+                    rule.setSpecificContact(cursor.getString(5));
+                    rule.setIgnoredContact(cursor.getString(6));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rules;
     }
 
 }

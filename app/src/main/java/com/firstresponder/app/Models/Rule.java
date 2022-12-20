@@ -10,6 +10,10 @@ public class Rule {
     private String specificContact;
     private String ignoredContact;
 
+    public Rule() {
+
+    }
+
     public String getMsgCount() {
         return msgCount;
     }

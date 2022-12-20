@@ -7,9 +7,13 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.RemoteInput;
+
+import com.firstresponder.app.Models.Rule;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -31,10 +35,10 @@ public class NotificationReceiver extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        super.onNotificationPosted(sbn);
+        //super.onNotificationPosted(sbn);
 
         if(Settings.Secure.getString(getContentResolver(),"enabled_notification_listeners").contains(getPackageName())// Check for Notification Permission
-                && sbn != null && !sbn.isOngoing() && sbn.getPackageName().equals("org.telegram.messenger.web")){
+                && sbn != null && !sbn.isOngoing() && sbn.getPackageName().equals("com.whatsapp")){
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -56,7 +60,28 @@ public class NotificationReceiver extends NotificationListenerService {
                                     if(title != null && text != null) {
 
                                         String contact = (String) title;
-                                        String contactNew = contact.replaceAll("[-+^()0-9 ]*", "");
+                                        char contactNew = contact.charAt(0);
+                                        //Log.e("ContactNew", "Contact: "+contactNew);
+                                        //Log.e("ContactNew", "Contact: "+contact);
+
+                                        if(contactNew == '+'){
+                                            //contact is new
+                                            //Log.e("ContactNew", "New Contact");
+                                            List<Rule> rules = dbHandler.nonContact(contact);
+                                            //Log.e("ContactNew", ""+rules.get(0).getReply());
+                                            String msg = rules.get(0).getReply();
+                                            sendMsg(msg);
+                                            Log.e("ContactNew", "Replied");
+                                            //sendMsg(rules);
+                                        } else{
+                                            //contact is old
+                                            //Log.e("ContactNew", "Old Contact");
+                                            List<Rule> rules = dbHandler.Contact(contact);
+                                            if (rules == null){
+                                                List<Rule> rules1 = dbHandler.Match(text.toString(), contact);
+                                            }
+                                        }
+                                        //String contactNew = contact.replaceAll("[-+^()0-9 ]*", "");
 
                                         //Log.e("ContactNew", "replyToLastNotification error: " + contactNew);
 
@@ -90,8 +115,8 @@ public class NotificationReceiver extends NotificationListenerService {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         isRunning = false;
+        super.onDestroy();
     }
 
     private ArrayList<RemoteInput> getRemoteInputs(Notification notification){
@@ -100,6 +125,7 @@ public class NotificationReceiver extends NotificationListenerService {
         for(NotificationCompat.Action act : wearableExtender.getActions()) {
             if(act != null && act.getRemoteInputs() != null) {
                 remoteInputs.addAll(Arrays.asList(act.getRemoteInputs()));
+                //Log.e("ContactNew", "Allowed");
             }
         }
         return remoteInputs;
@@ -119,7 +145,9 @@ public class NotificationReceiver extends NotificationListenerService {
         RemoteInput.addResultsToIntent(allremoteInputs, localIntent, bundle);
         try {
             Objects.requireNonNull(replyAction(notification)).actionIntent.send(this, 0, localIntent);
+            //Log.e("ContactNew", "replyToLastNotification error: ");
         } catch (PendingIntent.CanceledException e) {
+            Log.e("ContactNew", "replyToLastNotification error: " + e.getLocalizedMessage());
 
         }
     }
@@ -144,10 +172,12 @@ public class NotificationReceiver extends NotificationListenerService {
 
     private boolean isAllowFreeFormInput(NotificationCompat.Action action) {
         if (action.getRemoteInputs() == null) {
+            //Log.e("ContactNew", "Not Allowed");
             return false;
         }
         for (RemoteInput allowFreeFormInput : action.getRemoteInputs()) {
             if (allowFreeFormInput.getAllowFreeFormInput()) {
+                //Log.e("ContactNew", "Allowed");
                 return true;
             }
         }

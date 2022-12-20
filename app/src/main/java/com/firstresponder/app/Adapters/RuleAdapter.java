@@ -15,6 +15,8 @@ import com.firstresponder.app.AddRuleActivity;
 import com.firstresponder.app.DBHandler;
 import com.firstresponder.app.Models.Rule;
 import com.firstresponder.app.R;
+import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.textview.MaterialTextView;
 
 import java.util.ArrayList;
 
@@ -100,8 +102,8 @@ public class RuleAdapter extends RecyclerView.Adapter<RuleAdapter.ViewHolder>{
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mRule, mStatus, mReply;
-        private Switch mSwitch;
+        private MaterialTextView mRule, mStatus, mReply;
+        private SwitchMaterial mSwitch;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
